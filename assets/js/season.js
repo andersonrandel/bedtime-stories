@@ -142,35 +142,61 @@
     }
   }
 
-  // Apply a season everywhere on the current page.
-  function apply(season, persist = true) {
-    if (!SEASONS[season]) season = detectSeason();
+  // Paint the page for a given season (visuals only, no button state).
+  function render(season) {
     document.body.dataset.season = season;
-    if (persist) save(season);
     renderSky(season);
     renderParticles(season);
     renderGarden(season);
+  }
+
+  function setButtons(activeKey) {
     document.querySelectorAll(".season-btn").forEach((btn) => {
-      btn.setAttribute("aria-pressed", String(btn.dataset.season === season));
+      btn.setAttribute("aria-pressed", String(btn.dataset.key === activeKey));
     });
   }
 
-  // Build the selector buttons into a container (if present) and wire them up.
-  function buildSelector(containerId, current) {
+  // Choose a season, or "auto" to always follow today's real-world date.
+  function select(key, persist = true) {
+    if (key === "auto") {
+      render(detectSeason());
+      if (persist) save("auto");
+      setButtons("auto");
+    } else {
+      if (!SEASONS[key]) key = detectSeason();
+      render(key);
+      if (persist) save(key);
+      setButtons(key);
+    }
+  }
+
+  // Build the selector buttons (the four seasons + Auto) into a container.
+  function buildSelector(containerId) {
     const box = document.getElementById(containerId);
     if (!box) return;
     box.innerHTML = "";
-    ORDER.forEach((key) => {
+    const make = (key, emoji, label) => {
       const btn = document.createElement("button");
       btn.className = "season-btn";
       btn.type = "button";
-      btn.dataset.season = key;
-      btn.setAttribute("aria-pressed", String(key === current));
-      btn.innerHTML = `<span class="season-emoji">${SEASONS[key].emoji}</span>${SEASONS[key].label}`;
-      btn.addEventListener("click", () => apply(key));
+      btn.dataset.key = key;
+      if (SEASONS[key]) btn.dataset.season = key;
+      btn.innerHTML = `<span class="season-emoji">${emoji}</span>${label}`;
+      btn.addEventListener("click", () => select(key));
       box.appendChild(btn);
-    });
+    };
+    ORDER.forEach((key) => make(key, SEASONS[key].emoji, SEASONS[key].label));
+    make("auto", "🔄", "Auto");
   }
 
-  window.BedtimeSeason = { SEASONS, ORDER, detectSeason, saved, apply, buildSelector };
+  // Initialise a page: build the selector (if present) and apply the
+  // stored choice, defaulting to Auto (follow the date) for new visitors.
+  function init(containerId) {
+    if (containerId) buildSelector(containerId);
+    const stored = saved();
+    const activeKey = stored && SEASONS[stored] ? stored : "auto";
+    select(activeKey, false);
+  }
+
+  window.BedtimeSeason = { SEASONS, ORDER, detectSeason, saved, select, buildSelector, init };
 })();

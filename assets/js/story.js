@@ -1,10 +1,7 @@
 /* Story page: renders a single story from STORIES based on ?id= */
 (function () {
-  // Match the season chosen on the front page (or the current season).
-  if (window.BedtimeSeason) {
-    const S = window.BedtimeSeason;
-    S.apply(S.saved() || S.detectSeason(), false);
-  }
+  // Match the season chosen on the front page (or follow the date in Auto mode).
+  if (window.BedtimeSeason) window.BedtimeSeason.init();
 
   const params = new URLSearchParams(location.search);
   const id = params.get("id");

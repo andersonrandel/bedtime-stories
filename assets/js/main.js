@@ -39,11 +39,6 @@
     });
   }
 
-  // ---- Seasonal theme ----
-  if (window.BedtimeSeason) {
-    const S = window.BedtimeSeason;
-    const current = S.saved() || S.detectSeason();
-    S.buildSelector("seasons", current);
-    S.apply(current, false); // don't overwrite saved choice on initial load
-  }
+  // ---- Seasonal theme (selector + Auto, remembers your choice) ----
+  if (window.BedtimeSeason) window.BedtimeSeason.init("seasons");
 })();
