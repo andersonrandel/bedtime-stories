@@ -1,17 +1,9 @@
 /* Story page: renders a single story from STORIES based on ?id= */
 (function () {
-  // soft background sky reused from the front page
-  const sky = document.querySelector(".sky");
-  if (sky) {
-    for (let i = 0; i < 70; i++) {
-      const s = document.createElement("span");
-      s.className = "star";
-      s.style.left = Math.random() * 100 + "vw";
-      s.style.top = Math.random() * 100 + "vh";
-      s.style.setProperty("--dur", (2 + Math.random() * 4).toFixed(2) + "s");
-      s.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
-      sky.appendChild(s);
-    }
+  // Match the season chosen on the front page (or the current season).
+  if (window.BedtimeSeason) {
+    const S = window.BedtimeSeason;
+    S.apply(S.saved() || S.detectSeason(), false);
   }
 
   const params = new URLSearchParams(location.search);
